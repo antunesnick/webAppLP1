@@ -1,0 +1,55 @@
+{
+  "clientes": [
+    {
+      "id": "13c3",
+      "nome": "Nickolas Antunes",
+      "email": "nickolasalmeida2@gmail.com",
+      "telefone": "18991200676",
+      "cpf": "13321424",
+      "endereco": "Rua Francisco Rotta, 66",
+      "cidade": "Presidente Prudente",
+      "estado": "SP",
+      "cep": "19064-615"
+    }
+  ],
+  "produtos": [],
+  "fornecedores": [
+    {
+      "id": "e10a",
+      "nome": "nickolasalmeida2@gmail.com",
+      "cnpj": "4124214124",
+      "email": "nickolasalmeida2@gmail.com",
+      "telefone": "18991200676",
+      "endereco": "Rua Francisco Rotta, 66",
+      "cidade": "Presidente Prudente",
+      "estado": "SP",
+      "cep": "19064-615",
+      "contato": "Nickolas Antunes",
+      "categoria_produtos": "1231"
+    }
+  ],
+  "entregadores": [],
+  "categorias": [
+    {
+      "id": "49fc",
+      "nome": "cat45",
+      "codigo": "123412",
+      "descricao": "31234",
+      "status": "Ativa"
+    },
+    {
+      "id": "66e3",
+      "nome": "cat5",
+      "codigo": "cat1234",
+      "descricao": "asdasd",
+      "status": "Ativa"
+    }
+  ],
+  "usuarios": [
+    {
+      "id": "1",
+      "usuario": "admin",
+      "senha": "admin"
+    }
+  ]
+}
