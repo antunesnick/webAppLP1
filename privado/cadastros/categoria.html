@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Categorias - Sistema de Gestão</title>
+    <link rel="stylesheet" href="../publico/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../publico/css/estilos.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h2 class="form-title">Cadastro de Categorias</h2>
+            
+            <form id="formCategoria">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nome">Nome da Categoria *</label>
+                            <input type="text" id="nome" name="nome" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="codigo">Código da Categoria</label>
+                            <input type="text" id="codigo" name="codigo" placeholder="Ex: ELE, ALI, VES">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descricao">Descrição *</label>
+                    <textarea id="descricao" name="descricao" rows="3" required placeholder="Descreva o tipo de produtos desta categoria"></textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select id="status" name="status" required>
+                                <option value="">Selecione...</option>
+                                <option value="Ativa">Ativa</option>
+                                <option value="Inativa">Inativa</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn-primary">Cadastrar Categoria</button>
+                    <a href="/menu" class="btn-secondary">Voltar ao Menu</a>
+                </div>
+            </form>
+            
+            <div id="mensagem" style="display: none;"></div>
+        </div>
+        
+        <div class="table-container">
+            <h3>Categorias Cadastradas</h3>
+            <table id="tabelaCategorias">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Código</th>
+                        <th>Descrição</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', carregarCategorias);
+        
+        
+        document.getElementById('formCategoria').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const categoria = Object.fromEntries(formData);
+            
+            
+            if (!validarCampos(categoria)) {
+                return;
+            }
+            
+            try {
+                console.log("CAT A SEGUIR")
+                console.log(categoria);
+                const response = await fetch('/api/categorias', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(categoria)
+                });
+                
+                if (response.ok) {
+                    mostrarMensagem('Categoria cadastrada com sucesso!', 'success');
+                    this.reset();
+                    carregarCategorias();
+                } else {
+                    mostrarMensagem('Erro ao cadastrar categoria.', 'danger');
+                }
+            } catch (error) {
+                mostrarMensagem('Erro de conexão.', 'danger');
+            }
+        });
+        
+        function validarCampos(categoria) {
+            const camposObrigatorios = ['nome', 'descricao', 'status'];
+            
+            for (let campo of camposObrigatorios) {
+                if (!categoria[campo] || categoria[campo].trim() === '') {
+                    mostrarMensagem(`O campo ${campo} é obrigatório.`, 'danger');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        async function carregarCategorias() {
+            try {
+                const response = await fetch('/api/categorias');
+                if (response.ok) {
+                    const categorias = await response.json();
+                    exibirCategorias(categorias);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+            }
+        }
+        
+        function exibirCategorias(categorias) {
+            console.log(categorias);
+            const tbody = document.querySelector('#tabelaCategorias tbody');
+            tbody.innerHTML = categorias.map(categoria => `
+                <tr>
+                    <td>${categoria.nome}</td>
+                    <td>${categoria.codigo || '-'}</td>
+                    <td>${categoria.descricao}</td>
+                    <td>
+                        <span class="badge ${categoria.status === 'Ativa' ? 'bg-success' : 'bg-secondary'}">
+                            ${categoria.status}
+                        </span>
+                    </td>
+                    <td>
+                        <button onclick="excluirCategoria('${categoria.id}')" class="btn btn-sm btn-danger">Excluir</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function excluirCategoria(id) {
+            if (confirm('Tem certeza que deseja excluir esta categoria?')) {
+                try {
+                    const response = await fetch(`/api/categorias/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        mostrarMensagem('Categoria excluída com sucesso!', 'success');
+                        carregarCategorias();
+                    } else {
+                        mostrarMensagem('Erro ao excluir categoria.', 'danger');
+                    }
+                } catch (error) {
+                    mostrarMensagem('Erro de conexão.', 'danger');
+                }
+            }
+        }
+        
+        function mostrarMensagem(texto, tipo) {
+            const mensagem = document.getElementById('mensagem');
+            mensagem.className = `alert alert-${tipo}`;
+            mensagem.textContent = texto;
+            mensagem.style.display = 'block';
+            
+            setTimeout(() => {
+                mensagem.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
