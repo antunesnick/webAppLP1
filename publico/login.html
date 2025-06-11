@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema de Gestão</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <h2 class="text-center text-dark mt-5">Sistema de Gestão</h2>
+                <div class="text-center mb-5 text-dark">Faça o login para acessar</div>
+                <div class="card my-5">
+                    <form class="card-body cardbody-color p-lg-5" action="/login" method="post">
+                        <div class="text-center">
+                            <img src="imagens/login-avatar.webp"
+                                 class="img-fluid profile-image-pic img-thumbnail rounded-circle my-3"
+                                 width="200px" alt="Avatar de Login">
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" id="usuario" name="usuario"
+                                   placeholder="Usuário" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="password" class="form-control" id="senha" name="senha" 
+                                   placeholder="Senha" required>
+                        </div>
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-color px-5 mb-5 w-100">Entrar</button>
+                        </div>
+                        <div class="text-center">
+                            <a href="vitrine.html" class="text-muted">Ver vitrine de produtos</a>
+                        </div>
+                    </form>
+                </div>
+                
+              
+                <script>
+                    const urlParams = new URLSearchParams(window.location.search);
+                    if (urlParams.get('erro') === '1') {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'alert alert-danger text-center';
+                        errorDiv.textContent = 'Usuário ou senha incorretos!';
+                        document.querySelector('.card').after(errorDiv);
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
