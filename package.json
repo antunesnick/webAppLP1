@@ -1,0 +1,25 @@
+{
+  "name": "sistema-gestao-simplificado",
+  "version": "1.0.0",
+  "description": "Sistema de Gestão Simplificado para Trabalho Acadêmico",
+  "main": "servidor.js",
+  "type": "module",
+  "scripts": {
+    "start": "node servidor.js",
+    "json-server": "json-server --watch db.json --port 3001"
+  },
+  "keywords": [
+    "express",
+    "json-server",
+    "autenticacao",
+    "cadastro"
+  ],
+  "author": "Nickolas Antunes & Guilherme Aparecido",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "json-server": "^0.17.4",
+    "node-fetch": "^3.3.2"
+  }
+}
