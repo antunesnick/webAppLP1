@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vitrine de Produtos - Sistema de Gestão</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+    <div class="container">
+        <div class="vitrine-container">
+            <h1 class="vitrine-title">Vitrine de Produtos</h1>
+            
+            <div class="text-center mb-4">
+                <a href="login.html" class="btn btn-primary">Fazer Login</a>
+            </div>
+            
+            <div id="produtos-lista" class="produtos-grid">
+                
+            </div>
+            
+            <div id="mensagem-vazia" class="text-center mt-4" style="display: none;">
+                <p class="text-muted">Nenhum produto cadastrado ainda.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       
+        async function carregarProdutos() {
+            try {
+                const response = await fetch('/api/produtos');
+                if (response.ok) {
+                    const produtos = await response.json();
+                    exibirProdutos(produtos);
+                } else {
+                    
+                    document.getElementById('mensagem-vazia').style.display = 'block';
+                    document.getElementById('mensagem-vazia').innerHTML = 
+                        '<p class="text-muted">Faça login para ver os produtos cadastrados.</p>';
+                }
+            } catch (error) {
+                document.getElementById('mensagem-vazia').style.display = 'block';
+                document.getElementById('mensagem-vazia').innerHTML = 
+                    '<p class="text-muted">Faça login para ver os produtos cadastrados.</p>';
+            }
+        }
+
+        function exibirProdutos(produtos) {
+            const lista = document.getElementById('produtos-lista');
+            const mensagemVazia = document.getElementById('mensagem-vazia');
+            
+            if (produtos.length === 0) {
+                mensagemVazia.style.display = 'block';
+                return;
+            }
+            
+            lista.innerHTML = produtos.map(produto => `
+                <div class="produto-card">
+                    <h5>${produto.nome || 'Produto sem nome'}</h5>
+                    <p class="text-muted">${produto.descricao || 'Sem descrição'}</p>
+                    <p class="h6">Preço: R$ ${produto.preco || '0,00'}</p>
+                    <p class="small">Categoria: ${produto.categoria || 'Não informada'}</p>
+                </div>
+            `).join('');
+        }
+
+       
+        document.addEventListener('DOMContentLoaded', carregarProdutos);
+    </script>
+</body>
+</html>
