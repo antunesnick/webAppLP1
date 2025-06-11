@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro de Produtos - Sistema de Gestão</title>
+    <link rel="stylesheet" href="../publico/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../publico/css/estilos.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-container">
+            <h2 class="form-title">Cadastro de Produtos</h2>
+            
+            <form id="formProduto">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="nome">Nome do Produto *</label>
+                            <input type="text" id="nome" name="nome" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="categoria">Categoria *</label>
+                            <select id="categoria" name="categoria" required>
+                                <option value="">Selecione uma categoria...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descricao">Descrição *</label>
+                    <textarea id="descricao" name="descricao" rows="3" required></textarea>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="preco">Preço (R$) *</label>
+                            <input type="number" id="preco" name="preco" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="estoque">Quantidade em Estoque *</label>
+                            <input type="number" id="estoque" name="estoque" min="0" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="fornecedor">Fornecedor *</label>
+                            <select id="fornecedor" name="fornecedor" required>
+                                <option value="">Selecione um fornecedor...</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="codigo">Código do Produto</label>
+                            <input type="text" id="codigo" name="codigo">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="unidade">Unidade de Medida</label>
+                            <select id="unidade" name="unidade">
+                                <option value="">Selecione...</option>
+                                <option value="UN">Unidade</option>
+                                <option value="KG">Quilograma</option>
+                                <option value="L">Litro</option>
+                                <option value="M">Metro</option>
+                                <option value="CX">Caixa</option>
+                                <option value="PC">Peça</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn-primary">Cadastrar Produto</button>
+                    <a href="/menu" class="btn-secondary">Voltar ao Menu</a>
+                </div>
+            </form>
+            
+            <div id="mensagem" style="display: none;"></div>
+        </div>
+        
+        <div class="table-container">
+            <h3>Produtos Cadastrados</h3>
+            <table id="tabelaProdutos">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Categoria</th>
+                        <th>Preço</th>
+                        <th>Estoque</th>
+                        <th>Fornecedor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            carregarProdutos();
+            carregarCategorias();
+            carregarFornecedores();
+        });
+        
+        
+        document.getElementById('formProduto').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const produto = Object.fromEntries(formData);
+            
+            
+            if (!validarCampos(produto)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/produtos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(produto)
+                });
+                
+                if (response.ok) {
+                    mostrarMensagem('Produto cadastrado com sucesso!', 'success');
+                    this.reset();
+                    carregarProdutos();
+                } else {
+                    mostrarMensagem('Erro ao cadastrar produto.', 'danger');
+                }
+            } catch (error) {
+                mostrarMensagem('Erro de conexão.', 'danger');
+            }
+        });
+        
+        function validarCampos(produto) {
+            const camposObrigatorios = ['nome', 'categoria', 'descricao', 'preco', 'estoque', 'fornecedor'];
+            
+            for (let campo of camposObrigatorios) {
+                if (!produto[campo] || produto[campo].toString().trim() === '') {
+                    mostrarMensagem(`O campo ${campo} é obrigatório.`, 'danger');
+                    return false;
+                }
+            }
+            
+            if (parseFloat(produto.preco) < 0) {
+                mostrarMensagem('O preço deve ser maior ou igual a zero.', 'danger');
+                return false;
+            }
+            
+            if (parseInt(produto.estoque) < 0) {
+                mostrarMensagem('O estoque deve ser maior ou igual a zero.', 'danger');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        async function carregarProdutos() {
+            try {
+                const response = await fetch('/api/produtos');
+                if (response.ok) {
+                    const produtos = await response.json();
+                    exibirProdutos(produtos);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+            }
+        }
+        
+        async function carregarCategorias() {
+            try {
+                const response = await fetch('/api/categorias');
+                if (response.ok) {
+                    const categorias = await response.json();
+                    const select = document.getElementById('categoria');
+                    select.innerHTML = '<option value="">Selecione uma categoria...</option>';
+                    categorias.forEach(categoria => {
+                        select.innerHTML += `<option value="${categoria.nome}">${categoria.nome}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao carregar categorias:', error);
+            }
+        }
+        
+        async function carregarFornecedores() {
+            try {
+                const response = await fetch('/api/fornecedores');
+                if (response.ok) {
+                    const fornecedores = await response.json();
+                    const select = document.getElementById('fornecedor');
+                    select.innerHTML = '<option value="">Selecione um fornecedor...</option>';
+                    fornecedores.forEach(fornecedor => {
+                        select.innerHTML += `<option value="${fornecedor.nome}">${fornecedor.nome}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao carregar fornecedores:', error);
+            }
+        }
+        
+        function exibirProdutos(produtos) {
+            const tbody = document.querySelector('#tabelaProdutos tbody');
+            tbody.innerHTML = produtos.map(produto => `
+                <tr>
+                    <td>${produto.nome}</td>
+                    <td>${produto.categoria}</td>
+                    <td>R$ ${parseFloat(produto.preco).toFixed(2)}</td>
+                    <td>${produto.estoque}</td>
+                    <td>${produto.fornecedor}</td>
+                    <td>
+                        <button onclick="excluirProduto('${produto.id}')" class="btn btn-sm btn-danger">Excluir</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        async function excluirProduto(id) {
+            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                try {
+                    const response = await fetch(`/api/produtos/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (response.ok) {
+                        mostrarMensagem('Produto excluído com sucesso!', 'success');
+                        carregarProdutos();
+                    } else {
+                        mostrarMensagem('Erro ao excluir produto.', 'danger');
+                    }
+                } catch (error) {
+                    mostrarMensagem('Erro de conexão.', 'danger');
+                }
+            }
+        }
+        
+        function mostrarMensagem(texto, tipo) {
+            const mensagem = document.getElementById('mensagem');
+            mensagem.className = `alert alert-${tipo}`;
+            mensagem.textContent = texto;
+            mensagem.style.display = 'block';
+            
+            setTimeout(() => {
+                mensagem.style.display = 'none';
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
